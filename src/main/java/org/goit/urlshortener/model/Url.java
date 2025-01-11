@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +28,7 @@ public class Url {
 
     @Column(name = "original_url", nullable = false, columnDefinition = "TEXT")
     @NotNull(message = "Original URL cannot be null")
+    @URL(message = "Original URL must be a valid URL")
     private String originalUrl;
 
     @Column(name = "created_at", nullable = false, updatable = false)
