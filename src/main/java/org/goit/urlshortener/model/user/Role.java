@@ -22,8 +22,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class Role {
     @Id
-    @SequenceGenerator(allocationSize = 1, name = "role_seq", sequenceName = "seq_role_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq")
+    @SequenceGenerator(allocationSize = 1, name = "roles_seq", sequenceName = "seq_roles_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "roles_seq")
     private Long id;
 
     @Enumerated(EnumType.STRING)
