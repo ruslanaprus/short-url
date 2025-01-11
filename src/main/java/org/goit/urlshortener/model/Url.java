@@ -36,6 +36,7 @@ public class Url {
     private LocalDateTime expiresAt;
 
     @Column(name = "click_count", nullable = false)
+    @Builder.Default
     private Long clickCount = 0L;
 
     @ManyToOne
