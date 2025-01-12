@@ -10,11 +10,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
@@ -29,12 +32,17 @@ public class User {
     @Id
     @SequenceGenerator(allocationSize = 1, name = "users_seq", sequenceName = "seq_users_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
+    @Setter(AccessLevel.PRIVATE)
+    @Column(updatable = false, nullable = false)
     private Long id;
 
 
     @Column(nullable = false, unique = true)
     @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Invalid email format")
+    @Pattern(
+            regexp = "^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$",
+            message = "Invalid email format"
+    )
     private String email;
 
 
@@ -59,6 +67,13 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Url> urls;
+
+
+    @Builder
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 
 
     @PrePersist
