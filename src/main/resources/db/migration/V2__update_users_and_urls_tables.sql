@@ -11,7 +11,7 @@ ALTER TABLE users
     DROP COLUMN role;
 
 -- Remove the password length and content check from 'users' table
--- Drop the CHECK constraint on 'password' if it exists
+-- Drop the CHECK constraint on 'password' if it exist
 ALTER TABLE users
     DROP CONSTRAINT IF EXISTS users_password_check;
 
