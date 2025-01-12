@@ -2,21 +2,19 @@ package org.goit.urlshortener.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.goit.urlshortener.model.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
 
-    @Value("48a868a4042f634ac04a117f00a87202131dd7c46c4b32c4acb3edc5e15f4511wwe34er442")
+    @Value("ThisIsASecretKeyAndItIsSoSecureAndLongEnoughToUseItAsAKeyBecauseItContains32CharactersOrMore")
     // ${JWT_SECRET_KEY} - put to the environment variable later on
     private String jwtSecretKey;
 
@@ -24,11 +22,11 @@ public class JwtService {
     // ${JWT_EXPIRATION} - put to the environment variable later, or to some class with constant vars
     private Long jwtExpirationMs;
 
-    public String generateToken(User user) {
+    public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 //TODO
                 // override method from user entity that returns email instead
-                .subject(user.getUsername())
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(getSigningKey())
@@ -67,7 +65,6 @@ public class JwtService {
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
     }
 }

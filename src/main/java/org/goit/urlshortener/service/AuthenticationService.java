@@ -3,7 +3,7 @@ package org.goit.urlshortener.service;
 import lombok.RequiredArgsConstructor;
 import org.goit.urlshortener.model.dto.JwtAuthenticationResponse;
 import org.goit.urlshortener.model.dto.LoginRequest;
-import org.goit.urlshortener.model.dto.SignUpRequest;
+import org.goit.urlshortener.model.dto.SignupRequest;
 import org.goit.urlshortener.model.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +20,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationResponse signup(SignUpRequest request) {
+    public JwtAuthenticationResponse signup(SignupRequest request) {
         var user = User
                 .builder()
                 .email(request.getEmail())
