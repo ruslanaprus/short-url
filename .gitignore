@@ -229,3 +229,5 @@ $RECYCLE.BIN/
 # DB access details
 .env
 # End of https://www.toptal.com/developers/gitignore/api/java,gradle,intellij,macos
+# Ignore IntelliJ IDEA project files
+.idea/
