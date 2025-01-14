@@ -2,6 +2,7 @@ package org.goit.urlshortener;
 
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,6 +20,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
+    @DisplayName("Test findByEmail - when User exists")
     void testFindByEmail_userExists() {
         User user = new User("test@example.com", "Password1");
         userRepository.save(user);
@@ -28,6 +30,7 @@ class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Test findByEmail - when User does not exist")
     void testFindByEmail_userDoesNotExist() {
 
         Optional<User> result = userRepository.findByEmail("unknown@example.com");
@@ -35,6 +38,7 @@ class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Test existsByEmail - when Email exists")
     void testExistsByEmail_emailExists() {
 
         User user = new User("test@example.com", "Password1");
@@ -44,6 +48,7 @@ class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Test existsByEmail - when Email does not exist")
     void testExistsByEmail_emailDoesNotExist() {
 
         boolean exists = userRepository.existsByEmail("unknown@example.com");

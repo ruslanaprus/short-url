@@ -5,6 +5,7 @@ import org.goit.urlshortener.model.request.UserCreateRequest;
 import org.goit.urlshortener.repository.UserRepository;
 import org.goit.urlshortener.service.GlobalExceptionHandler;
 import org.goit.urlshortener.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Test
+    @DisplayName("Create User - when User already exists")
     void testCreateUser_alreadyExists() {
         UserCreateRequest request = new UserCreateRequest("test@example.com", "Password1");
         when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
@@ -40,6 +42,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Create User - successful creation")
     void testCreateUser_successfulCreation() {
         UserCreateRequest request = new UserCreateRequest("test@example.com", "Password1");
         when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
@@ -53,6 +56,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Find User by Email - User found")
     void testFindUserByEmail() {
         String email = "test@example.com";
         User user = new User("test@example.com", "Password1");
@@ -65,6 +69,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Find User By Email - User not found")
     void testFindUserByEmail_notFound() {
         String email = "unknown@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
