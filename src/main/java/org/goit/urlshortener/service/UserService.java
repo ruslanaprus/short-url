@@ -1,5 +1,6 @@
 package org.goit.urlshortener.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.goit.urlshortener.ExceptionMessages;
 import org.goit.urlshortener.model.User;
@@ -30,6 +31,6 @@ public class UserService {
 
     public Optional<User> findUserByEmail(String email) {
         return Optional.ofNullable(userRepository.findByEmail(email).
-                orElseThrow(() -> new GlobalExceptionHandler(ExceptionMessages.USER_NOT_FOUND)));
+                orElseThrow(() -> new EntityNotFoundException(String.valueOf(ExceptionMessages.USER_NOT_FOUND))));
     }
 }

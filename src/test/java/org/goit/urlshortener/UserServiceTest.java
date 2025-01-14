@@ -1,9 +1,9 @@
 package org.goit.urlshortener;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.model.request.UserCreateRequest;
 import org.goit.urlshortener.repository.UserRepository;
-import org.goit.urlshortener.service.GlobalExceptionHandler;
 import org.goit.urlshortener.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,8 +74,8 @@ class UserServiceTest {
         String email = "unknown@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        GlobalExceptionHandler exception = assertThrows(
-                GlobalExceptionHandler.class,
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
                 () -> userService.findUserByEmail(email)
         );
 
