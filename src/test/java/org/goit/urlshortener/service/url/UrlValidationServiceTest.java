@@ -2,6 +2,7 @@ package org.goit.urlshortener.service.url;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class UrlValidationServiceTest {
