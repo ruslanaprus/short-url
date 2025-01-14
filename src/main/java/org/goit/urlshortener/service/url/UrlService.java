@@ -1,11 +1,11 @@
 package org.goit.urlshortener.service.url;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.repository.UrlRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,15 +29,12 @@ public class UrlService {
     private int defaultExpiryDays;
 
     public Page<Url> findUrlsByUser(@NotNull User user, Pageable pageable) {
-        return findUrls(user.getId(), pageable);
+        log.info("Fetching URLs for user with id={}, pageable={}", user.getId(), pageable);
+        return urlRepository.findByUser(user, pageable);
     }
 
     public Page<Url> findUrlsByUserId(Long userId, Pageable pageable) {
-        return findUrls(userId, pageable);
-    }
-
-    private Page<Url> findUrls(Long userId, Pageable pageable) {
-        log.info("Fetching URLs for user with id={}, pageable={}", userId, pageable);
+        log.info("Fetching URLs for userId={}, pageable={}", userId, pageable);
         return urlRepository.findByUserId(userId, pageable);
     }
 
