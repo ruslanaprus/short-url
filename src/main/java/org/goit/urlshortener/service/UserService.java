@@ -1,6 +1,7 @@
 package org.goit.urlshortener.service;
 
 import lombok.RequiredArgsConstructor;
+import org.goit.urlshortener.ExceptionMessages;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.model.request.UserCreateRequest;
 import org.goit.urlshortener.repository.UserRepository;
@@ -28,6 +29,7 @@ public class UserService {
     }
 
     public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return Optional.ofNullable(userRepository.findByEmail(email).
+                orElseThrow(() -> new GlobalExceptionHandler(ExceptionMessages.USER_NOT_FOUND)));
     }
 }

@@ -11,10 +11,8 @@ CREATE SEQUENCE IF NOT EXISTS seq_urls_id
 -- Create Users table
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT DEFAULT nextval('seq_users_id'),
-    username VARCHAR(50) NOT NULL,
     email VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL CHECK (length(password) >= 8 AND password ~ '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'),
-    role VARCHAR(10) NOT NULL CHECK (role IN ('Admin', 'User', 'Owner')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_users_id PRIMARY KEY (id)
 );
