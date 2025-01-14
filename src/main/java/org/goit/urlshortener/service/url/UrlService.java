@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.InvalidUrlException;
 
-import javax.management.timer.Timer;
 import java.time.LocalDateTime;
-import java.util.Iterator;
 
 @Service
 @RequiredArgsConstructor
@@ -74,4 +72,6 @@ public class UrlService {
     public Page<Url> findUrlsByUserId(Long userId, Pageable pageable) {
         return urlRepository.findByUserId(userId, pageable);
     }
+
+    
 }
