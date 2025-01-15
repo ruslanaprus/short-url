@@ -14,12 +14,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("ThisIsASecretKeyAndItIsSoSecureAndLongEnoughToUseItAsAKeyBecauseItContains32CharactersOrMore")
-    // ${JWT_SECRET_KEY} - put to the environment variable later on
+    @Value("${token.jwt.secret-key}")
     private String jwtSecretKey;
 
-    @Value("3600000")
-    // ${JWT_EXPIRATION} - put to the environment variable later, or to some class with constant vars
+    @Value("${token.jwt.expiration}")
     private Long jwtExpirationMs;
 
     public String generateToken(UserDetails userDetails) {
