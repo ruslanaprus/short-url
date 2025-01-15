@@ -1,4 +1,7 @@
 package org.goit.urlshortener.repository;
 
-public class UserRepository {
+import org.goit.urlshortener.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
 }

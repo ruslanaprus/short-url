@@ -66,4 +66,8 @@ public class User {
     protected void setCreationTimestamp() {
         createdAt = LocalDateTime.now();
     }
+
+    public void setIdForTest(Long id) {
+        this.id = id;
+    }
 }
