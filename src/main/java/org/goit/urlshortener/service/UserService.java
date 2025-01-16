@@ -1,7 +1,9 @@
 package org.goit.urlshortener.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
+import org.goit.urlshortener.exceptionHandler.UserAlreadyExistsException;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.model.dto.SignupMapper;
 import org.goit.urlshortener.model.dto.request.SignupRequest;
@@ -24,7 +26,7 @@ public class UserService {
     @Transactional
     public SignupResponse createUser(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("User already exists");
+            throw new UserAlreadyExistsException(ExceptionMessages.USER_ALREADY_EXISTS.getMessage());
         }
         User user = User.builder()
                 .email(request.email())

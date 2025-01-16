@@ -2,6 +2,7 @@ package org.goit.urlshortener;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.goit.urlshortener.model.User;
+import org.goit.urlshortener.model.dto.request.SignupRequest;
 import org.goit.urlshortener.repository.UserRepository;
 import org.goit.urlshortener.service.UserService;
 import org.junit.jupiter.api.DisplayName;
