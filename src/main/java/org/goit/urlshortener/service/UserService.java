@@ -2,33 +2,38 @@ package org.goit.urlshortener.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.goit.urlshortener.ExceptionMessages;
-import org.goit.urlshortener.SignupRequest;
+import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
+import org.goit.urlshortener.exceptionHandler.UserAlreadyExistsException;
 import org.goit.urlshortener.model.User;
+import org.goit.urlshortener.model.dto.SignupMapper;
+import org.goit.urlshortener.model.dto.request.SignupRequest;
+import org.goit.urlshortener.model.dto.response.SignupResponse;
 import org.goit.urlshortener.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final SignupMapper signupMapper;
 
     @Transactional
-    public String createUser(SignupRequest request ) {
+    public SignupResponse createUser(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            return "User already exists";
+            throw new UserAlreadyExistsException(ExceptionMessages.USER_ALREADY_EXISTS.getMessage());
         }
-        var user = User.builder()
+        User user = User.builder()
                 .email(request.email())
-                .password(request.password())
+                .password(passwordEncoder.encode(request.password()))
                 .build();
         userRepository.save(user);
-
-        return "User created successfully";
+        return signupMapper.mapToResponse(request.email(), "User created");
     }
 
     public Optional<User> findUserByEmail(String email) {
@@ -37,4 +42,3 @@ public class UserService {
                         (String.valueOf(ExceptionMessages.USER_NOT_FOUND.getMessage()))));
     }
 }
-
