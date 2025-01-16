@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +33,9 @@ public class UserService {
         return signupMapper.mapToResponse(request.email(), "User created");
     }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User " + email + " not found"));
+    public Optional<User> findUserByEmail(String email) {
+        return Optional.ofNullable(userRepository.findByEmail(email).
+                orElseThrow(() -> new EntityNotFoundException
+                        (String.valueOf(ExceptionMessages.USER_NOT_FOUND.getMessage()))));
     }
 }
