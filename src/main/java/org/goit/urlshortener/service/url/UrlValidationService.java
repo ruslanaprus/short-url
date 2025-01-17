@@ -2,8 +2,10 @@ package org.goit.urlshortener.service.url;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.InvalidUrlException;
+
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.INVALID_ORIGINAL_URL_DATA;
 
 @Slf4j
 @Component
@@ -15,15 +17,16 @@ public class UrlValidationService {
     void validateUrl(String url) {
         if (url == null || url.isBlank()) {
             log.warn("Validation failed: URL is null or blank");
-            throw new InvalidUrlException("URL cannot be null or blank");
+            throw new ShortUrlException(INVALID_ORIGINAL_URL_DATA);
         }
 
         if (!validator.isValid(url)) {
             log.warn("Validation failed: Invalid URL format: {}", url);
-            throw new InvalidUrlException("Invalid URL format: " + url);
+            throw new ShortUrlException(INVALID_ORIGINAL_URL_DATA);
         }
 
         log.debug("URL validation passed: {}", url);
     }
 }
+
 

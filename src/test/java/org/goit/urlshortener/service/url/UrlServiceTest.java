@@ -1,17 +1,19 @@
 package org.goit.urlshortener.service.url;
 
+import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.repository.UrlRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -85,9 +87,10 @@ class UrlServiceTest {
 
         when(urlRepository.findByShortCode("testShortCode")).thenReturn(Optional.of(expiredUrl));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.getValidUrl("testShortCode"));
-        assertEquals("This URL has expired", exception.getMessage());
+
+        assertEquals(URL_EXPIRED.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -118,9 +121,9 @@ class UrlServiceTest {
 
         when(urlRepository.findByIdAndUser(1L, otherUser)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.deleteUrl(1L, otherUser));
-        assertEquals("URL not found or user not authorized to delete it", exception.getMessage());
+        assertEquals(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -144,7 +147,8 @@ class UrlServiceTest {
     @Test
     @DisplayName("Fetching original URL by short code should return correct URL")
     void testFindOriginalUrlByShortCode() {
-        when(urlRepository.findOriginalUrlByShortCode("testShortCode")).thenReturn(Optional.of("https://example.com"));
+        when(urlRepository.findOriginalUrlByShortCode("testShortCode"))
+                .thenReturn(Optional.of("https://example.com"));
 
         Optional<String> originalUrl = urlService.findOriginalUrlByShortCode("testShortCode");
         assertTrue(originalUrl.isPresent());
@@ -169,8 +173,8 @@ class UrlServiceTest {
     void testGetNonExistentUrl() {
         when(urlRepository.findByShortCode("testShortCode")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.getValidUrl("testShortCode"));
-        assertEquals("URL not found or invalid shortCode", exception.getMessage());
+        assertEquals("URL not found", exception.getMessage());
     }
 }

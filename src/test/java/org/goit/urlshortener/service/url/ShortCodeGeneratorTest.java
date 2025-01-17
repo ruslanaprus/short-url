@@ -1,11 +1,13 @@
 package org.goit.urlshortener.service.url;
 
+import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.SHORT_CODE_ALREADY_EXISTS;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShortCodeGeneratorTest {
@@ -33,8 +35,10 @@ class ShortCodeGeneratorTest {
     @Test
     @DisplayName("Generator should throw exception when max attempts exceeded")
     void testMaxAttemptsExceeded() {
-        assertThrows(IllegalStateException.class, () ->
-                generator.generateUniqueShortCode(code -> true));
+        ShortUrlException ex = assertThrows(ShortUrlException.class,
+                () -> generator.generateUniqueShortCode(code -> true));
+
+        assertEquals(SHORT_CODE_ALREADY_EXISTS.getMessage(), ex.getMessage());
     }
 
     @Test
