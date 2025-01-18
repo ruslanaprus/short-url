@@ -25,4 +25,10 @@ public interface UrlRepository extends JpaRepository<Url, Long> {
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
            "FROM Url u WHERE u.id = :urlId AND u.expiresAt > :now")
     boolean existsActiveUrlById(@Param("urlId") Long urlId, @Param("now") LocalDateTime now);
+
+    @Query("SELECT u FROM Url u WHERE u.user = :user AND (u.expiresAt IS NULL OR u.expiresAt > CURRENT_TIMESTAMP)")
+    Page<Url> findActiveUrlsByUser(@Param("user") User user, Pageable pageable);
+
+    @Query("SELECT u FROM Url u WHERE u.user = :user AND u.expiresAt <= CURRENT_TIMESTAMP")
+    Page<Url> findExpiredUrlsByUser(@Param("user") User user, Pageable pageable);
 }

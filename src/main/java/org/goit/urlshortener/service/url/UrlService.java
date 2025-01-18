@@ -3,9 +3,11 @@ package org.goit.urlshortener.service.url;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
 import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
+import org.goit.urlshortener.model.dto.request.UrlCreateRequest;
 import org.goit.urlshortener.repository.UrlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -44,19 +46,28 @@ public class UrlService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Url createUrl(String originalUrl, @NotNull User currentUser) {
+    public Url createUrl(UrlCreateRequest request, @NotNull User currentUser) {
         log.info("Creating a new URL for user with id={}", currentUser.getId());
-        urlValidator.validateUrl(originalUrl);
-        log.debug("URL validation passed: {}", originalUrl);
+        urlValidator.validateUrl(request.originalUrl());
+        log.debug("URL validation passed: {}", request.originalUrl());
 
-        String shortCode = shortCodeGenerator.generateUniqueShortCode(urlRepository::existsByShortCode);
-        log.debug("Generated unique shortCode: {}", shortCode);
+        String shortCode;
+        if (request.shortCode() != null && !request.shortCode().isEmpty()) {
+            log.debug("Using custom shortCode: {}", request.shortCode());
+            if (urlRepository.existsByShortCode(request.shortCode())) {
+                throw new ShortUrlException(ExceptionMessages.SHORT_CODE_ALREADY_EXISTS);
+            }
+            shortCode = request.shortCode();
+        } else {
+            shortCode = shortCodeGenerator.generateUniqueShortCode(urlRepository::existsByShortCode);
+            log.debug("Generated unique shortCode: {}", shortCode);
+        }
 
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime expiresAt = createdAt.plusDays(defaultExpiryDays);
 
         Url newUrl = Url.builder()
-                .originalUrl(originalUrl)
+                .originalUrl(request.originalUrl())
                 .shortCode(shortCode)
                 .createdAt(createdAt)
                 .expiresAt(expiresAt)
@@ -121,4 +132,31 @@ public class UrlService {
         log.info("Checking if URL with id={} is active at {}", urlId, now);
         return urlRepository.existsActiveUrlById(urlId, now);
     }
+
+    public Page<Url> listUrlsByStatus(@NotNull User user, @NotNull String status, @NotNull Pageable pageable) {
+        log.info("Listing URLs for user id={}, status={}, pageable={}", user.getId(), status, pageable);
+
+        return switch (status.toLowerCase()) {
+            case "active" -> urlRepository.findActiveUrlsByUser(user, pageable);
+            case "expired" -> urlRepository.findExpiredUrlsByUser(user, pageable);
+            case "all" -> urlRepository.findByUser(user, pageable);
+            default -> throw new IllegalArgumentException("Invalid status: " + status);
+        };
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Url updateUrl(Long id, Url url, @NotNull User currentUser) {
+        log.info("Request to edit URL with id={} by user with id={}", id, currentUser.getId());
+        urlValidator.validateUrl(url.getOriginalUrl());
+
+        Url existingUrl = urlRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new RuntimeException("URL not found or user not authorized to edit it"));
+
+        existingUrl.setOriginalUrl(url.getOriginalUrl());
+        existingUrl.setShortCode(url.getShortCode());
+        Url updatedUrl = urlRepository.save(existingUrl);
+        log.info("URL with id={} successfully updated by user with id={}", id, currentUser.getId());
+        return updatedUrl;
+    }
+
 }
