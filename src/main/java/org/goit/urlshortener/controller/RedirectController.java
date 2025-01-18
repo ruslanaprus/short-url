@@ -3,10 +3,12 @@ package org.goit.urlshortener.controller;
 import lombok.RequiredArgsConstructor;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.service.url.UrlService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
@@ -22,6 +24,7 @@ public class RedirectController {
         return redirectView;
     }
 
+    @Cacheable("RedirectView")
     @GetMapping("/s/{shortCode}")
     public RedirectView redirectToOriginalUrl(@PathVariable String shortCode) {
         try {
@@ -38,5 +41,4 @@ public class RedirectController {
             return error;
         }
     }
-
 }
