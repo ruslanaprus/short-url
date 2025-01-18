@@ -91,9 +91,12 @@ public class UrlService {
         return urlRepository.findOriginalUrlByShortCode(shortCode);
     }
 
-    public Optional<Url> findByIdAndUser(Long id, @NotNull User user) {
-        log.info("Fetching URL with id={} for user with id={}", id, user.getId());
-        return urlRepository.findByIdAndUser(id, user);
+    @Transactional(readOnly = true)
+    public Url findByIdAndUser(Long urlId, @NotNull User user) {
+        log.info("Fetching URL with id={} for user with id={}", urlId, user.getId());
+
+        return urlRepository.findByIdAndUser(urlId, user)
+                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND_OR_UNAUTHORIZED));
     }
 
     public Url getValidUrl(String shortCode) {
