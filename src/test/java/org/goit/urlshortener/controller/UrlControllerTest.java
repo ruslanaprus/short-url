@@ -1,5 +1,6 @@
 package org.goit.urlshortener.controller;
 
+import org.goit.urlshortener.TestcontainersConfiguration;
 import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
 import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
@@ -25,7 +26,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.testcontainers.utility.TestcontainersConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -58,9 +58,6 @@ class UrlControllerTest {
     private UserRepository userRepo;
 
     private User testUser;
-
-    @Value("${token.test.bearer}")
-    private String testToken;
 
     @BeforeEach
     void setUp() {
@@ -110,8 +107,7 @@ class UrlControllerTest {
         // When & Then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/urls")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"originalUrl\": \"https://example.com\", \"shortCode\": \"short\"}")
-                        .header("Authorization", testToken))
+                        .content("{\"originalUrl\": \"https://example.com\", \"shortCode\": \"short\"}"))
                 .andDo(print())  // <= prints request and response in the test logs
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.originalUrl").value("https://example.com"))
@@ -141,8 +137,7 @@ class UrlControllerTest {
         // When & Then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/urls")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"originalUrl\": \"htp://invalid-url\"}")
-                        .header("Authorization", testToken))
+                        .content("{\"originalUrl\": \"htp://invalid-url\"}"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Invalid request data"));
