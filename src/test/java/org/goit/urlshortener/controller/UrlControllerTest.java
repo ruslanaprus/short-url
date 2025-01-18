@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -58,6 +59,9 @@ class UrlControllerTest {
 
     private User testUser;
 
+    @Value("${token.test.bearer}")
+    private String testToken;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -73,7 +77,6 @@ class UrlControllerTest {
         // Given
         String originalUrl = "https://example.com";
         String shortCode = "short";
-        String testToken = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJib2JAYm9iLmNvbSIsImlhdCI6MTczNzIwOTUwNSwiZXhwIjoxNzM3ODE0MzA1fQ.27KJmQ7GXB35KMzhOYeUieVs8uMNz-Ry9GRAKh1Gkmv4uMbpSrcX3w60eXl8alC1Oti72-faPgE1UD8VyOb1xg";
 
         UrlCreateRequest request = UrlCreateRequest.builder()
                 .originalUrl(originalUrl)
@@ -121,7 +124,6 @@ class UrlControllerTest {
     void createUrl_invalidUrl() throws Exception {
         // Given
         String invalidUrl = "htp://invalid-url";
-        String testToken = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJib2JAYm9iLmNvbSIsImlhdCI6MTczNzIwOTUwNSwiZXhwIjoxNzM3ODE0MzA1fQ.27KJmQ7GXB35KMzhOYeUieVs8uMNz-Ry9GRAKh1Gkmv4uMbpSrcX3w60eXl8alC1Oti72-faPgE1UD8VyOb1xg";
 
         UrlCreateRequest request = UrlCreateRequest.builder()
                 .originalUrl(invalidUrl)
