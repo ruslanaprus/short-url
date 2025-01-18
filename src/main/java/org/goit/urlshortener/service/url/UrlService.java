@@ -134,4 +134,20 @@ public class UrlService {
             default -> throw new IllegalArgumentException("Invalid status: " + status);
         };
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Url updateUrl(Long id, Url url, @NotNull User currentUser) {
+        log.info("Request to edit URL with id={} by user with id={}", id, currentUser.getId());
+        urlValidator.validateUrl(url.getOriginalUrl());
+
+        Url existingUrl = urlRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new RuntimeException("URL not found or user not authorized to edit it"));
+
+        existingUrl.setOriginalUrl(url.getOriginalUrl());
+        existingUrl.setShortCode(url.getShortCode());
+        Url updatedUrl = urlRepository.save(existingUrl);
+        log.info("URL with id={} successfully updated by user with id={}", id, currentUser.getId());
+        return updatedUrl;
+    }
+
 }
