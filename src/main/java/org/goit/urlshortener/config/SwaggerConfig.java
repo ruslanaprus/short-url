@@ -6,7 +6,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 import java.util.List;
 
@@ -47,18 +46,4 @@ public class SwaggerConfig {
                 .info(apiInfo)
                 .paths(paths);
     }
-
-    @Bean
-    public WebSecurityCustomizer swaggerWebSecurityCustomizer() {
-
-        final String[] SWAGGER_WHITELIST = {
-                "/swagger-ui.html",
-                "/swagger-resources/**",
-                "/api-docs/**",
-                "/swagger-ui/**"
-        };
-
-        return web -> web.ignoring().requestMatchers(SWAGGER_WHITELIST);
-    }
-
 }
