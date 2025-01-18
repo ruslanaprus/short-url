@@ -3,13 +3,14 @@ package org.goit.urlshortener.service.url;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
 import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
+import org.goit.urlshortener.model.dto.request.UrlCreateRequest;
 import org.goit.urlshortener.repository.UrlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,19 +46,28 @@ public class UrlService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Url createUrl(String originalUrl, @NotNull User currentUser) {
+    public Url createUrl(UrlCreateRequest request, @NotNull User currentUser) {
         log.info("Creating a new URL for user with id={}", currentUser.getId());
-        urlValidator.validateUrl(originalUrl);
-        log.debug("URL validation passed: {}", originalUrl);
+        urlValidator.validateUrl(request.originalUrl());
+        log.debug("URL validation passed: {}", request.originalUrl());
 
-        String shortCode = shortCodeGenerator.generateUniqueShortCode(urlRepository::existsByShortCode);
-        log.debug("Generated unique shortCode: {}", shortCode);
+        String shortCode;
+        if (request.shortCode() != null && !request.shortCode().isEmpty()) {
+            log.debug("Using custom shortCode: {}", request.shortCode());
+            if (urlRepository.existsByShortCode(request.shortCode())) {
+                throw new ShortUrlException(ExceptionMessages.SHORT_CODE_ALREADY_EXISTS);
+            }
+            shortCode = request.shortCode();
+        } else {
+            shortCode = shortCodeGenerator.generateUniqueShortCode(urlRepository::existsByShortCode);
+            log.debug("Generated unique shortCode: {}", shortCode);
+        }
 
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime expiresAt = createdAt.plusDays(defaultExpiryDays);
 
         Url newUrl = Url.builder()
-                .originalUrl(originalUrl)
+                .originalUrl(request.originalUrl())
                 .shortCode(shortCode)
                 .createdAt(createdAt)
                 .expiresAt(expiresAt)

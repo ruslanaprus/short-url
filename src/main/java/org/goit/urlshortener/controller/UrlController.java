@@ -52,8 +52,7 @@ public class UrlController {
     @ResponseStatus(HttpStatus.CREATED)
     public UrlResponse create(@Valid @RequestBody UrlCreateRequest newUrlRequest,
                               @AuthenticationPrincipal User currentUser) {
-        String originalUrl = newUrlRequest.originalUrl();
-        Url savedUrl = urlService.createUrl(originalUrl, currentUser);
+        Url savedUrl = urlService.createUrl(newUrlRequest, currentUser);
         return urlMapper.toUrlResponse(savedUrl);
     }
 

@@ -3,6 +3,7 @@ package org.goit.urlshortener.service.url;
 import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
+import org.goit.urlshortener.model.dto.request.UrlCreateRequest;
 import org.goit.urlshortener.repository.UrlRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ class UrlServiceTest {
         User user = new User();
         user.setIdForTest(1L);
         String originalUrl = "https://example.com";
+        UrlCreateRequest request = new UrlCreateRequest(originalUrl, null); // No custom shortCode
 
         Url expectedUrl = new Url();
         expectedUrl.setId(1L);
@@ -40,7 +42,7 @@ class UrlServiceTest {
         when(generator.generateUniqueShortCode(any())).thenReturn("testShortCode");
         when(urlRepository.save(any(Url.class))).thenReturn(expectedUrl);
 
-        Url url = urlService.createUrl(originalUrl, user);
+        Url url = urlService.createUrl(request, user);
 
         assertNotNull(url);
         assertEquals("https://example.com", url.getOriginalUrl());

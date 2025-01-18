@@ -69,13 +69,6 @@ class UrlControllerTest {
     @DisplayName("POST /api/v1/urls - Should create a new URL")
     void createUrl() throws Exception {
         // Given
-
-        System.out.println("===TESTtestUser = " + testUser);
-        // Authenticated user
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(testUser, null, List.of())
-        );
-
         String originalUrl = "https://example.com";
         String shortCode = "short";
         String testToken = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJib2JAYm9iLmNvbSIsImlhdCI6MTczNzIwOTUwNSwiZXhwIjoxNzM3ODE0MzA1fQ.27KJmQ7GXB35KMzhOYeUieVs8uMNz-Ry9GRAKh1Gkmv4uMbpSrcX3w60eXl8alC1Oti72-faPgE1UD8VyOb1xg";
@@ -93,21 +86,21 @@ class UrlControllerTest {
                 .clickCount(0L)
                 .build();
 
-        System.out.println("===TESTsavedUrl = " + savedUrl);
-
         UrlResponse expectedResponse = new UrlResponse(
                 originalUrl,
                 shortCode,
                 0L
         );
+        // Authenticated user
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(testUser, null, List.of())
+        );
 
         // Mock the service and mapper behavior
-//        when(urlService.createUrl(originalUrl, testUser)).thenReturn(savedUrl);
-        when(urlService.createUrl(eq("https://example.com"), any(User.class)))
+        when(urlService.createUrl(eq(request), any(User.class)))
                 .thenReturn(savedUrl);
-//        when(urlMapper.toUrlResponse(savedUrl)).thenReturn(expectedResponse);
         when(urlMapper.toUrlResponse(savedUrl))
-                .thenReturn(new UrlResponse("https://example.com", "short", 0L));
+                .thenReturn(expectedResponse);
 
         // When & Then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/urls")
@@ -117,7 +110,7 @@ class UrlControllerTest {
                 .andDo(print())  // <= prints request and response in the test logs
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.originalUrl").value("https://example.com"))
-                .andExpect(jsonPath("$.shortCode").value("CgeeWX"))
+                .andExpect(jsonPath("$.shortCode").value("short"))
                 .andExpect(jsonPath("$.clickCount").value(0));
     }
 }
