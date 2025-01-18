@@ -76,8 +76,10 @@ class UrlServiceTest {
         when(urlRepository.findByShortCode("testShortCode")).thenReturn(Optional.of(url));
         when(urlRepository.save(any())).thenReturn(url);
 
-        Url updatedUrl = urlService.incrementClickCount("testShortCode");
-        assertEquals(1L, updatedUrl.getClickCount());
+        urlService.incrementClickCount(url);
+
+        assertEquals(1L, url.getClickCount(), "Click count should be incremented by 1");
+        verify(urlRepository).save(url);
     }
 
     @Test

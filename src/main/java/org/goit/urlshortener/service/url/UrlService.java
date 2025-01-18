@@ -121,13 +121,11 @@ public class UrlService {
     }
 
     @Transactional
-    public Url incrementClickCount(String shortCode) {
-        log.info("Request to increment clickCount for URL with shortCode={}", shortCode);
-        Url url = getValidUrl(shortCode);
+    public void incrementClickCount(Url url) {
+        log.info("Request to increment clickCount for URL with shortCode={}", url.getShortCode());
         url.setClickCount(url.getClickCount() + 1);
         Url updatedUrl = urlRepository.save(url);
-        log.info("ClickCount for URL with shortCode={} incremented to {}", shortCode, updatedUrl.getClickCount());
-        return updatedUrl;
+        log.info("ClickCount for URL with shortCode={} incremented to {}", url.getShortCode(), updatedUrl.getClickCount());
     }
 
     public boolean isUrlActive(Long urlId, LocalDateTime now) {
