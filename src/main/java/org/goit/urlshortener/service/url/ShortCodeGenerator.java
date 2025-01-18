@@ -1,10 +1,13 @@
 package org.goit.urlshortener.service.url;
 
 import lombok.extern.slf4j.Slf4j;
+import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.util.function.Predicate;
+
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.SHORT_CODE_ALREADY_EXISTS;
 
 @Slf4j
 @Component
@@ -23,7 +26,7 @@ public class ShortCodeGenerator {
         do {
             if (attempts >= MAX_ATTEMPTS) {
                 log.error("Failed to generate a unique shortCode after {} attempts", MAX_ATTEMPTS);
-                throw new IllegalStateException("Unable to generate a unique shortCode");
+                throw new ShortUrlException(SHORT_CODE_ALREADY_EXISTS);
             }
 
             shortCode = generateRandomCode();
