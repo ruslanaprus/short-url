@@ -3,6 +3,7 @@ package org.goit.urlshortener.service.url;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.repository.UrlRepository;
@@ -14,6 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED;
 
 @Slf4j
 @Service
@@ -70,7 +75,7 @@ public class UrlService {
         log.info("Request to delete URL with id={} by user with id={}", urlId, currentUser.getId());
 
         Url url = urlRepository.findByIdAndUser(urlId, currentUser)
-                .orElseThrow(() -> new RuntimeException("URL not found or user not authorized to delete it"));
+                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND_OR_UNAUTHORIZED));
 
         urlRepository.delete(url);
         log.info("URL with id={} was deleted by user with id={}", urlId, currentUser.getId());
@@ -81,30 +86,26 @@ public class UrlService {
         return urlRepository.findByShortCode(shortCode);
     }
 
-    public Optional<String> findOriginalUrlByShortCode(String shortCode) {
-        log.info("Fetching original URL by shortCode={}", shortCode);
-        return urlRepository.findOriginalUrlByShortCode(shortCode);
-    }
+    @Transactional(readOnly = true)
+    public Url findByIdAndUser(Long urlId, @NotNull User user) {
+        log.info("Fetching URL with id={} for user with id={}", urlId, user.getId());
 
-    public Optional<Url> findByIdAndUser(Long id, @NotNull User user) {
-        log.info("Fetching URL with id={} for user with id={}", id, user.getId());
-        return urlRepository.findByIdAndUser(id, user);
+        return urlRepository.findByIdAndUser(urlId, user)
+                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND_OR_UNAUTHORIZED));
     }
 
     public Url getValidUrl(String shortCode) {
-        log.info("Fetching valid URL by shortCode={}", shortCode);
         Url url = urlRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> {
                     log.warn("URL not found or shortCode is invalid: {}", shortCode);
-                    return new RuntimeException("URL not found or invalid shortCode");
+                    return new ShortUrlException(URL_NOT_FOUND);
                 });
 
         if (url.getExpiresAt() != null && url.getExpiresAt().isBefore(LocalDateTime.now())) {
             log.warn("URL with shortCode={} has expired", shortCode);
-            throw new RuntimeException("This URL has expired");
+            throw new ShortUrlException(URL_EXPIRED);
         }
 
-        log.info("URL with shortCode={} is valid", shortCode);
         return url;
     }
 
