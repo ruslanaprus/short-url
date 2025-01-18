@@ -1,5 +1,7 @@
 package org.goit.urlshortener.controller;
 
+import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
+import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.model.dto.mapper.UrlMapper;
@@ -113,4 +115,35 @@ class UrlControllerTest {
                 .andExpect(jsonPath("$.shortCode").value("short"))
                 .andExpect(jsonPath("$.clickCount").value(0));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/urls - Should return 400 if URL is invalid")
+    void createUrl_invalidUrl() throws Exception {
+        // Given
+        String invalidUrl = "htp://invalid-url";
+        String testToken = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJib2JAYm9iLmNvbSIsImlhdCI6MTczNzIwOTUwNSwiZXhwIjoxNzM3ODE0MzA1fQ.27KJmQ7GXB35KMzhOYeUieVs8uMNz-Ry9GRAKh1Gkmv4uMbpSrcX3w60eXl8alC1Oti72-faPgE1UD8VyOb1xg";
+
+        UrlCreateRequest request = UrlCreateRequest.builder()
+                .originalUrl(invalidUrl)
+                .build();
+
+        // Authenticated user
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(testUser, null, List.of())
+        );
+
+        // Mock the service to simulate invalid URL validation
+        when(urlService.createUrl(eq(request), any(User.class)))
+                .thenThrow(new ShortUrlException(ExceptionMessages.INVALID_ORIGINAL_URL_DATA));
+
+        // When & Then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/urls")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"originalUrl\": \"htp://invalid-url\"}")
+                        .header("Authorization", testToken))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid request data"));
+    }
+
 }
