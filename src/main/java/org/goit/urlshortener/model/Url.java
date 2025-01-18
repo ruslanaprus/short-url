@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.URL;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
