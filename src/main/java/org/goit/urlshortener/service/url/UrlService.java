@@ -8,6 +8,7 @@ import org.goit.urlshortener.model.User;
 import org.goit.urlshortener.repository.UrlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,5 +122,16 @@ public class UrlService {
     public boolean isUrlActive(Long urlId, LocalDateTime now) {
         log.info("Checking if URL with id={} is active at {}", urlId, now);
         return urlRepository.existsActiveUrlById(urlId, now);
+    }
+
+    public Page<Url> listUrlsByStatus(@NotNull User user, @NotNull String status, @NotNull Pageable pageable) {
+        log.info("Listing URLs for user id={}, status={}, pageable={}", user.getId(), status, pageable);
+
+        return switch (status.toLowerCase()) {
+            case "active" -> urlRepository.findActiveUrlsByUser(user, pageable);
+            case "expired" -> urlRepository.findExpiredUrlsByUser(user, pageable);
+            case "all" -> urlRepository.findByUser(user, pageable);
+            default -> throw new IllegalArgumentException("Invalid status: " + status);
+        };
     }
 }
