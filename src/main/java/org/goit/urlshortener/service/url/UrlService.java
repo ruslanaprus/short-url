@@ -86,11 +86,6 @@ public class UrlService {
         return urlRepository.findByShortCode(shortCode);
     }
 
-    public Optional<String> findOriginalUrlByShortCode(String shortCode) {
-        log.info("Fetching original URL by shortCode={}", shortCode);
-        return urlRepository.findOriginalUrlByShortCode(shortCode);
-    }
-
     @Transactional(readOnly = true)
     public Url findByIdAndUser(Long urlId, @NotNull User user) {
         log.info("Fetching URL with id={} for user with id={}", urlId, user.getId());

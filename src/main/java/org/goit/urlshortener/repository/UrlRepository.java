@@ -20,9 +20,6 @@ public interface UrlRepository extends JpaRepository<Url, Long> {
 
     Optional<Url> findByIdAndUser(@Param("id") Long id, @Param("user") User user);
 
-    @Query("SELECT u.originalUrl FROM Url u WHERE u.shortCode = :shortCode")
-    Optional<String> findOriginalUrlByShortCode(@Param("shortCode") String shortCode);
-
     boolean existsByShortCode(String shortCode);
 
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +

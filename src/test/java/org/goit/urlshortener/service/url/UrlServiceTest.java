@@ -145,17 +145,6 @@ class UrlServiceTest {
     }
 
     @Test
-    @DisplayName("Fetching original URL by short code should return correct URL")
-    void testFindOriginalUrlByShortCode() {
-        when(urlRepository.findOriginalUrlByShortCode("testShortCode"))
-                .thenReturn(Optional.of("https://example.com"));
-
-        Optional<String> originalUrl = urlService.findOriginalUrlByShortCode("testShortCode");
-        assertTrue(originalUrl.isPresent());
-        assertEquals("https://example.com", originalUrl.get());
-    }
-
-    @Test
     @DisplayName("Fetching valid URL without expiry should work correctly")
     void testGetValidUrlWithoutExpiry() {
         Url url = new Url();
