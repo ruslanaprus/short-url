@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 }
 
 group = 'org.goit'
@@ -13,6 +14,10 @@ java {
 	}
 }
 
+jacoco {
+	toolVersion = "0.8.12"
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -21,6 +26,10 @@ configurations {
 
 repositories {
 	mavenCentral()
+}
+
+ext {
+	set('snippetsDir', file("build/generated-snippets"))
 }
 
 dependencies {
@@ -58,6 +67,15 @@ dependencies {
 }
 
 tasks.named('test') {
+	outputs.dir snippetsDir
 	useJUnitPlatform()
 	systemProperty "spring.profiles.active", "test"
+}
+
+tasks.jacocoTestReport {
+	dependsOn test // Ensure tests run before generating the report
+	reports {
+		xml.required = true // Required for Codecov or other services
+		html.required = true // Optional for local HTML reports
+	}
 }
