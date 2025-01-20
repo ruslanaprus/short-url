@@ -3,6 +3,7 @@ package org.goit.urlshortener.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.core.userdetails.User;
@@ -17,7 +18,7 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig
-class JwtServiceIntegrationTest {
+class JwtServiceTest {
 
     private JwtService jwtService;
 
@@ -35,6 +36,7 @@ class JwtServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("Test generate and validate token")
     void testGenerateAndValidateToken() {
         UserDetails userDetails = Mockito.mock(User.class);
         Mockito.when(userDetails.getUsername()).thenReturn("testUser");
@@ -50,6 +52,7 @@ class JwtServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("Test token expiration")
     void testTokenExpiration() throws InterruptedException, NoSuchFieldException, IllegalAccessException {
 
         UserDetails userDetails = Mockito.mock(User.class);
@@ -70,6 +73,7 @@ class JwtServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("Test extract all claims")
     void testExtractAllClaims() {
         SecretKey secretKey = Keys.hmacShaKeyFor(
                 "ThisIsASecretKeyAndItIsSoSecureAndLongEnoughToUseItAsAKeyBecauseItContains32CharactersOrMore"
