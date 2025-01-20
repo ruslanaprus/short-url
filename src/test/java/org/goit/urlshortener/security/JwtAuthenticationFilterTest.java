@@ -1,0 +1,102 @@
+package org.goit.urlshortener.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.goit.urlshortener.service.CustomUserDetailsService;
+import org.goit.urlshortener.service.JwtService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.io.IOException;
+import java.util.Collections;
+
+import static org.mockito.Mockito.*;
+
+class JwtAuthenticationFilterTest {
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private CustomUserDetailsService userDetailsService;
+
+    @Mock
+    private HttpServletRequest request;
+
+    @Mock
+    private HttpServletResponse response;
+
+    @Mock
+    private FilterChain filterChain;
+
+    @InjectMocks
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void shouldSetAuthenticationForValidToken() throws ServletException, IOException {
+        // Mock request with valid Authorization header
+        when(request.getHeader("Authorization")).thenReturn("Bearer validToken");
+
+        // Mock JWT service behavior
+        String userEmail = "test@example.com";
+        when(jwtService.extractUserName("validToken")).thenReturn(userEmail);
+        when(jwtService.isTokenValid(eq("validToken"), any(UserDetails.class))).thenReturn(true);
+
+        // Mock UserDetailsService behavior
+        UserDetails userDetails = new User(userEmail, "password", Collections.emptyList());
+        when(userDetailsService.loadUserByUsername(userEmail)).thenReturn(userDetails);
+
+        // Act
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        // Assert
+        verify(filterChain).doFilter(request, response);
+        assert SecurityContextHolder.getContext().getAuthentication() != null;
+        assert SecurityContextHolder.getContext().getAuthentication().getName().equals(userEmail);
+    }
+
+    @Test
+    void shouldNotSetAuthenticationForInvalidToken() throws ServletException, IOException {
+        // Mock request with invalid Authorization header
+        when(request.getHeader("Authorization")).thenReturn("Bearer invalidToken");
+
+        // Mock JWT service behavior
+        when(jwtService.extractUserName("invalidToken")).thenReturn("test@example.com");
+        when(jwtService.isTokenValid(eq("invalidToken"), any(UserDetails.class))).thenReturn(false);
+
+        // Act
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        // Assert
+        verify(filterChain).doFilter(request, response);
+        assert SecurityContextHolder.getContext().getAuthentication() == null;
+    }
+
+    @Test
+    void shouldSkipFilterForMissingAuthorizationHeader() throws ServletException, IOException {
+        // Mock request without Authorization header
+        when(request.getHeader("Authorization")).thenReturn(null);
+
+        // Act
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        // Assert
+        verify(filterChain).doFilter(request, response);
+        verifyNoInteractions(jwtService, userDetailsService);
+        assert SecurityContextHolder.getContext().getAuthentication() == null;
+    }
+}
