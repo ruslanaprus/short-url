@@ -24,4 +24,4 @@ services:
       - POSTGRES_PASSWORD=$DB_PASS
       - POSTGRES_USER=$DB_USER
     ports:
-      - "5433:5432"
+      - "5434:5432"
