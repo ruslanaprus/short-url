@@ -13,14 +13,15 @@ import org.goit.urlshortener.service.url.UrlService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +34,8 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,14 +48,11 @@ class UrlControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private UrlService urlService;
 
-    @Mock
+    @MockBean
     private UrlMapper urlMapper;
-
-    @InjectMocks
-    private UrlController urlController;
 
     @Autowired
     private UserRepository userRepo;
@@ -66,6 +66,40 @@ class UrlControllerTest {
         testUser = new User("testUser@mail.com", "dummy_secret");
         testUser = userRepo.save(testUser);
         SecurityContextHolder.clearContext(); // clear any previous auth
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/urls - Should return a list of URLs for the user")
+    void listUrlsReturnsUrls() throws Exception {
+        // Mock user
+        User mockUser = User.builder().id(1L).email("test@example.com").build();
+
+        // Mock URLs
+        List<Url> urls = List.of(
+                Url.builder().id(1L).originalUrl("http://example.com").shortCode("url").build(),
+                Url.builder().id(1L).originalUrl("http://example.com").shortCode("url").build()
+        );
+        Page<Url> urlPage = new PageImpl<>(urls);
+
+        // Mock service and mapper
+        when(urlService.listUrlsByStatus(eq(mockUser), eq("all"), any(PageRequest.class)))
+                .thenReturn(urlPage);
+
+        when(urlMapper.toUrlResponse(any(Url.class)))
+                .thenAnswer(invocation -> {
+                    Url url = invocation.getArgument(0);
+                    return new UrlResponse(url.getOriginalUrl(), url.getShortCode(), url.getClickCount());
+                });
+
+        // Perform request
+        mockMvc.perform(get("/api/v1/urls")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("status", "all")
+                        .with(user(mockUser))) // Simulate authenticated user
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].originalUrl").value("http://example.com"));
     }
 
     @Test
