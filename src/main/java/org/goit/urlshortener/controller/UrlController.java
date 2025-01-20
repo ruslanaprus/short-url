@@ -114,7 +114,9 @@ public class UrlController {
                                     schema = @Schema(implementation = UrlResponse.class))}),
                     @ApiResponse(responseCode = "400", description = "Invalid URL data or ID provided"),
                     @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
-                    @ApiResponse(responseCode = "404", description = "URL not found")
+                    @ApiResponse(responseCode = "404", description = "URL not found"),
+                    @ApiResponse(responseCode = "409", description = "URL already exists",
+                            content = @Content)
             })
 
     @PutMapping("/{id}")
@@ -131,6 +133,7 @@ public class UrlController {
             description = "Remove a specific URL using its unique identifier",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Successfully deleted URL with no response body"),
+                    @ApiResponse(responseCode = "400", description = "Invalid ID provided"),
                     @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
                     @ApiResponse(responseCode = "404", description = "URL not found")
             })
@@ -147,6 +150,7 @@ public class UrlController {
                     @ApiResponse(responseCode = "200", description = "Successfully retrieved URL details",
                             content = {@Content(mediaType = "application/json",
                                     schema = @Schema(implementation = UrlResponse.class))}),
+                    @ApiResponse(responseCode = "400", description = "Invalid ID provided"),
                     @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
                     @ApiResponse(responseCode = "404", description = "URL not found")
             })
