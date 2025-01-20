@@ -3,6 +3,7 @@ package org.goit.urlshortener.service.url;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
 import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
@@ -16,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.SHORT_CODE_ALREADY_EXISTS;
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.*;
 
 @Slf4j
 @Service
@@ -79,7 +78,7 @@ public class UrlService {
         log.info("Request to delete URL with id={} by user with id={}", urlId, currentUser.getId());
 
         Url url = urlRepository.findByIdAndUser(urlId, currentUser)
-                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage()));
 
         urlRepository.delete(url);
         log.info("URL with id={} was deleted by user with id={}", urlId, currentUser.getId());
@@ -91,7 +90,7 @@ public class UrlService {
         return urlRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> {
                     log.warn("URL not found for shortCode={}", shortCode);
-                    return new ShortUrlException(URL_NOT_FOUND.getMessage());
+                    return new ShortUrlException(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage());
                 });
     }
 
@@ -100,7 +99,7 @@ public class UrlService {
         log.info("Fetching URL with id={} for user with id={}", urlId, user.getId());
 
         return urlRepository.findByIdAndUser(urlId, user)
-                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new ShortUrlException(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage()));
     }
 
     public Url getValidUrl(String shortCode) {
@@ -139,17 +138,29 @@ public class UrlService {
 
     @Transactional(rollbackFor = Exception.class)
     public Url updateUrl(Long id, Url url, @NotNull User currentUser) {
-        log.info("Request to edit URL with id={} by user with id={}", id, currentUser.getId());
+        log.info("Request to update URL with id={} by user with id={}", id, currentUser.getId());
+
+        // Validate URL ownership
+        Url existingUrl = urlRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new ShortUrlException(ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage()));
+
+        // Check if short code already exists (and belongs to a different URL)
+        if (!existingUrl.getShortCode().equals(url.getShortCode()) &&
+                urlRepository.existsByShortCode(url.getShortCode())) {
+            throw new ShortUrlException(ExceptionMessages.SHORT_CODE_ALREADY_EXISTS.getMessage());
+        }
+
+        // Validate the new original URL format
         urlValidator.validateUrl(url.getOriginalUrl());
 
-        Url existingUrl = urlRepository.findByIdAndUser(id, currentUser)
-                .orElseThrow(() -> new RuntimeException("URL not found or user not authorized to edit it"));
-
+        // Update and save the URL
         existingUrl.setOriginalUrl(url.getOriginalUrl());
         existingUrl.setShortCode(url.getShortCode());
         Url updatedUrl = urlRepository.save(existingUrl);
+
         log.info("URL with id={} successfully updated by user with id={}", id, currentUser.getId());
         return updatedUrl;
     }
+
 
 }

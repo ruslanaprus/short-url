@@ -21,9 +21,20 @@ import java.util.stream.Stream;
 @RestControllerAdvice
 public class ShortUrlExceptionHandler {
 
+
     @ExceptionHandler(ShortUrlException.class)
     public ResponseEntity<Map<String, ErrorResponse>> handleShortUrlException(ShortUrlException ex) {
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+        HttpStatus status;
+
+        if (ex.getMessage().equals(ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage())) {
+            status = HttpStatus.NOT_FOUND;
+        } else if (ex.getMessage().equals(ExceptionMessages.SHORT_CODE_ALREADY_EXISTS.getMessage())) {
+            status = HttpStatus.CONFLICT;
+        } else {
+            status = HttpStatus.BAD_REQUEST;
+        }
+
+        return buildErrorResponse(status, ex.getMessage());
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
