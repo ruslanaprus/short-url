@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.INVALID_ORIGINAL_URL_DATA;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -115,6 +116,7 @@ class UrlControllerTest {
                 .andExpect(jsonPath("$.clickCount").value(0));
     }
 
+
     @Test
     @DisplayName("POST /api/v1/urls - Should return 400 if URL is invalid")
     void createUrl_invalidUrl() throws Exception {
@@ -132,7 +134,7 @@ class UrlControllerTest {
 
         // Mock the service to simulate invalid URL validation
         when(urlService.createUrl(eq(request), any(User.class)))
-                .thenThrow(new ShortUrlException(ExceptionMessages.INVALID_ORIGINAL_URL_DATA));
+                .thenThrow(new ShortUrlException(INVALID_ORIGINAL_URL_DATA.getMessage()));
 
         // When & Then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/urls")
@@ -140,7 +142,8 @@ class UrlControllerTest {
                         .content("{\"originalUrl\": \"htp://invalid-url\"}"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Invalid request data"));
+                .andExpect(jsonPath("$.error.errors[0].message").value("Invalid URL format"));
     }
+
 
 }

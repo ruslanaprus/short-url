@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND;
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -127,7 +128,7 @@ class UrlServiceTest {
 
         ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.deleteUrl(1L, otherUser));
-        assertEquals(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage(), exception.getMessage());
+        assertEquals(URL_NOT_FOUND.getMessage(), exception.getMessage());
     }
 
     @Test

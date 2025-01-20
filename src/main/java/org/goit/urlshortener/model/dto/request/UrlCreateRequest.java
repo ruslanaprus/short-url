@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.URL;
 
 @Builder
 public record UrlCreateRequest(
-        @URL
+        @URL(message = "Invalid URL format")
         @NotNull(message = "Title must not be null")
         @NotEmpty(message = "Title must not be empty") String originalUrl,
 

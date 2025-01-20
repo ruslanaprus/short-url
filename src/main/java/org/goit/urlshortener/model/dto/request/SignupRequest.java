@@ -7,7 +7,7 @@ import lombok.Builder;
 
 @Builder
 public record SignupRequest(
-        @Email
+        @Email(message = "Invalid email format")
         @NotBlank(message = "Email must not be blank") String email,
         @Pattern(
                 regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",

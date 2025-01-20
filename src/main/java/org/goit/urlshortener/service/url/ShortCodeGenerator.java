@@ -26,7 +26,7 @@ public class ShortCodeGenerator {
         do {
             if (attempts >= MAX_ATTEMPTS) {
                 log.error("Failed to generate a unique shortCode after {} attempts", MAX_ATTEMPTS);
-                throw new ShortUrlException(SHORT_CODE_ALREADY_EXISTS);
+                throw new ShortUrlException(SHORT_CODE_ALREADY_EXISTS.getMessage());
             }
 
             shortCode = generateRandomCode();

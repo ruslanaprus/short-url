@@ -11,8 +11,9 @@ public enum ExceptionMessages {
     USER_NOT_FOUND("User not found"),
     INVALID_USER_DATA("Invalid user data"),
     USER_ALREADY_EXISTS("User already exists"),
-    URL_NOT_FOUND_OR_UNAUTHORIZED("URL not found or user not authorized to delete it"),
-    URL_EXPIRED("This URL has expired");
+    URL_NOT_FOUND_OR_UNAUTHORIZED("URL not found or user not authorized"),
+    URL_EXPIRED("This URL has expired"),
+    USER_NOT_AUTHORIZED("User is not authorized");
 
     private final String message;
 
