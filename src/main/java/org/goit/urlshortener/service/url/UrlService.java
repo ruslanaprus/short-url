@@ -98,7 +98,7 @@ public class UrlService {
         return urlRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> {
                     log.warn("URL not found for shortCode={}", shortCode);
-                    return new ShortUrlException(ExceptionMessages.URL_NOT_FOUND);
+                    return new ShortUrlException(ExceptionMessages.URL_NOT_FOUND.getMessage());
                 });
     }
 
