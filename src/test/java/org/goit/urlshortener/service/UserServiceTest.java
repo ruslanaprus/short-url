@@ -1,4 +1,4 @@
-package org.goit.urlshortener;
+package org.goit.urlshortener.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.goit.urlshortener.exceptionHandler.UserAlreadyExistsException;
@@ -7,7 +7,6 @@ import org.goit.urlshortener.model.dto.SignupMapper;
 import org.goit.urlshortener.model.dto.request.SignupRequest;
 import org.goit.urlshortener.model.dto.response.SignupResponse;
 import org.goit.urlshortener.repository.UserRepository;
-import org.goit.urlshortener.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

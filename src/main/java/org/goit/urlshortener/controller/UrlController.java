@@ -79,4 +79,9 @@ public class UrlController {
         return urlMapper.toUrlResponse(urlService.findByIdAndUser(id, currentUser));
     }
 
+    @GetMapping("/shortCode/{shortCode}")
+    public UrlResponse getByShortCode(
+            @PathVariable String shortCode) {
+        return urlMapper.toUrlResponse(urlService.findByShortCode(shortCode));
+    }
 }
