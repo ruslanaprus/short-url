@@ -38,11 +38,6 @@ public class UrlService {
         return urlRepository.findByUser(user, pageable);
     }
 
-    public Page<Url> findUrlsByUserId(Long userId, Pageable pageable) {
-        log.info("Fetching URLs for userId={}, pageable={}", userId, pageable);
-        return urlRepository.findByUserId(userId, pageable);
-    }
-
     @Transactional(rollbackFor = Exception.class)
     public Url createUrl(UrlCreateRequest request, @NotNull User currentUser) {
         log.info("Creating a new URL for user with id={}", currentUser.getId());
@@ -129,11 +124,6 @@ public class UrlService {
         url.setClickCount(url.getClickCount() + 1);
         Url updatedUrl = urlRepository.save(url);
         log.info("ClickCount for URL with shortCode={} incremented to {}", url.getShortCode(), updatedUrl.getClickCount());
-    }
-
-    public boolean isUrlActive(Long urlId, LocalDateTime now) {
-        log.info("Checking if URL with id={} is active at {}", urlId, now);
-        return urlRepository.existsActiveUrlById(urlId, now);
     }
 
     public Page<Url> listUrlsByStatus(@NotNull User user, @NotNull String status, @NotNull Pageable pageable) {
