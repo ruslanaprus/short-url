@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.SHORT_CODE_ALREADY_EXISTS;
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND;
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED;
 
 @Slf4j
 @Service
@@ -98,7 +97,7 @@ public class UrlService {
         return urlRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> {
                     log.warn("URL not found for shortCode={}", shortCode);
-                    return new ShortUrlException(ExceptionMessages.URL_NOT_FOUND);
+                    return new ShortUrlException(URL_NOT_FOUND.getMessage());
                 });
     }
 
