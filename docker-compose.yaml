@@ -1,9 +1,27 @@
 services:
+
+  app:
+    image: 'shorturl:1.0.0'
+    build:
+      context: .
+    container_name: 'shorturl'
+    depends_on:
+      - postgres
+    environment:
+      - JWT_SECRET=$JWT_SECRET
+      - TOKEN_EXPIRATION=$TOKEN_EXPIRATION
+      - DB_URL=jdbc:postgresql://postgres/shorturl
+      - DB_USER=$DB_USER
+      - DB_PASS=$DB_PASS
+    ports:
+      - "8080:8080"
+
   postgres:
     image: 'postgres:latest'
+    container_name: 'shorturl-postgres'
     environment:
-      - 'POSTGRES_DB=shorturl'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - POSTGRES_DB=shorturl
+      - POSTGRES_PASSWORD=$DB_PASS
+      - POSTGRES_USER=$DB_USER
     ports:
       - "5434:5432"

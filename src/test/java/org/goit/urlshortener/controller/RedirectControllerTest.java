@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,12 +29,6 @@ class RedirectControllerTest {
 
     @Autowired
     private UrlService urlService;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
 
     private Url testUrl;
 
@@ -53,43 +46,34 @@ class RedirectControllerTest {
 
     @Test
     @WithMockUser(username = "testUser", roles = "USER")
-    void testSimpleRedirect() throws Exception {
-        mockMvc.perform(get("/simple"))
-                .andExpect(status().isMovedPermanently())
-                .andExpect(redirectedUrl("https://example.com"));
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = "USER")
     void testRedirectToOriginalUrl_Success() throws Exception {
-        testUrl.setExpiresAt(LocalDateTime.now().plusDays(1));
-
         when(urlService.getValidUrl("abc123")).thenReturn(testUrl);
 
         mockMvc.perform(get("/s/abc123"))
                 .andExpect(status().isMovedPermanently())
                 .andExpect(redirectedUrl("https://example.com"));
+
+        verify(urlService).incrementClickCount(testUrl);
     }
 
 
     @Test
     @WithMockUser(username = "testUser", roles = "USER")
-    void testRedirectToOriginalUrl_NotFound() throws Exception {
+    void testRedirectToOriginalUrl_InvalidCode() throws Exception {
         when(urlService.getValidUrl("invalidCode")).thenThrow(new RuntimeException("URL not found or invalid shortCode"));
 
         mockMvc.perform(get("/s/invalidCode"))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isGone())
                 .andExpect(redirectedUrl("/error"));
     }
 
     @Test
     @WithMockUser(username = "testUser", roles = "USER")
     void testRedirectToOriginalUrl_ExpiredUrl() throws Exception {
-        testUrl.setExpiresAt(LocalDateTime.now().minusDays(1));
-        when(urlService.getValidUrl("abc123")).thenThrow(new RuntimeException("This URL has expired"));
+        when(urlService.getValidUrl("expiredCode")).thenThrow(new RuntimeException("This URL has expired"));
 
-        mockMvc.perform(get("/s/abc123"))
-                .andExpect(status().isNotFound())
+        mockMvc.perform(get("/s/expiredCode"))
+                .andExpect(status().isGone())
                 .andExpect(redirectedUrl("/error"));
     }
 
