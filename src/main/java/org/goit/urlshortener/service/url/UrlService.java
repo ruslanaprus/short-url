@@ -3,7 +3,6 @@ package org.goit.urlshortener.service.url;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.goit.urlshortener.exceptionHandler.ExceptionMessages;
 import org.goit.urlshortener.exceptionHandler.ShortUrlException;
 import org.goit.urlshortener.model.Url;
 import org.goit.urlshortener.model.User;
