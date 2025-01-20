@@ -14,7 +14,7 @@ services:
       - DB_USER=$DB_USER
       - DB_PASS=$DB_PASS
     ports:
-      - "8080:8080"
+      - "9000:8080"
 
   postgres:
     image: 'postgres:latest'

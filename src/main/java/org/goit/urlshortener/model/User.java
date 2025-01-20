@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,8 @@ import java.util.List;
 @Table(name = "users")
 @ToString(exclude = "urls")
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class User implements UserDetails {
     @Id

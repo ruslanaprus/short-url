@@ -8,11 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface UrlRepository extends JpaRepository<Url, Long> {
-    Page<Url> findByUserId(Long userId, Pageable pageable);
 
     Page<Url> findByUser(@Param("user") User user, Pageable pageable);
 
@@ -21,10 +19,6 @@ public interface UrlRepository extends JpaRepository<Url, Long> {
     Optional<Url> findByIdAndUser(@Param("id") Long id, @Param("user") User user);
 
     boolean existsByShortCode(String shortCode);
-
-    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
-           "FROM Url u WHERE u.id = :urlId AND u.expiresAt > :now")
-    boolean existsActiveUrlById(@Param("urlId") Long urlId, @Param("now") LocalDateTime now);
 
     @Query("SELECT u FROM Url u WHERE u.user = :user AND (u.expiresAt IS NULL OR u.expiresAt > CURRENT_TIMESTAMP)")
     Page<Url> findActiveUrlsByUser(@Param("user") User user, Pageable pageable);

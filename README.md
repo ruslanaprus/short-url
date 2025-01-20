@@ -106,7 +106,7 @@ Below is a list of the required variables and their default values:
 |`DB_URL`|JDBC URL for connecting to the database.| `jdbc:postgresql://postgres/shorturl` |
 |`DB_USER`|Database username (matches `POSTGRES_USER`).| `myuser`                              |
 |`DB_PASS`|Database password (matches `POSTGRES_PASSWORD`).| `secret`                              |
-|`SPRING_LOCAL_PORT`|The local port to access the Spring application.| `8080`                                |
+|`SPRING_LOCAL_PORT`|The local port to access the Spring application.| `9000`                                |
 
 ---
 

@@ -8,13 +8,15 @@ import org.goit.urlshortener.repository.UrlRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND_OR_UNAUTHORIZED;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -127,7 +129,7 @@ class UrlServiceTest {
 
         ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.deleteUrl(1L, otherUser));
-        assertEquals(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage(), exception.getMessage());
+        assertEquals(URL_NOT_FOUND.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -169,5 +171,228 @@ class UrlServiceTest {
         ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.getValidUrl("testShortCode"));
         assertEquals("URL not found", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return URL when shortCode is found")
+    void testFindByShortCode_Success() {
+        // Arrange
+        String shortCode = "abc123";
+        Url expectedUrl = new Url();
+        expectedUrl.setShortCode(shortCode);
+        expectedUrl.setOriginalUrl("http://example.com");
+
+        when(urlRepository.findByShortCode(shortCode)).thenReturn(Optional.of(expectedUrl));
+
+        // Act
+        Url result = urlService.findByShortCode(shortCode);
+
+        // Assert
+        assertNotNull(result, "Result should not be null");
+        assertEquals(expectedUrl, result, "The returned URL should match the expected URL");
+        verify(urlRepository, times(1)).findByShortCode(shortCode);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw ShortUrlException when shortCode is not found")
+    void testFindByShortCode_NotFound() {
+        // Arrange
+        String shortCode = "nonexistent";
+
+        when(urlRepository.findByShortCode(shortCode)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ShortUrlException exception = assertThrows(ShortUrlException.class, () -> {
+            urlService.findByShortCode(shortCode);
+        });
+
+        assertEquals("URL not found", exception.getMessage(), "Exception message should match");
+        verify(urlRepository, times(1)).findByShortCode(shortCode);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should list active URLs by user")
+    void testListUrlsByStatus_Active() {
+        // Arrange
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Pageable pageable = mock(Pageable.class);
+        List<Url> urls = List.of(new Url(), new Url());
+        Page<Url> expectedPage = new PageImpl<>(urls);
+
+        when(urlRepository.findActiveUrlsByUser(user, pageable)).thenReturn(expectedPage);
+
+        // Act
+        Page<Url> result = urlService.listUrlsByStatus(user, "active", pageable);
+
+        // Assert
+        assertNotNull(result, "Result should not be null");
+        assertEquals(expectedPage, result, "The returned page should match the expected page");
+        verify(urlRepository, times(1)).findActiveUrlsByUser(user, pageable);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should list expired URLs by user")
+    void testListUrlsByStatus_Expired() {
+        // Arrange
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Pageable pageable = mock(Pageable.class);
+        List<Url> urls = List.of(new Url(), new Url());
+        Page<Url> expectedPage = new PageImpl<>(urls);
+
+        when(urlRepository.findExpiredUrlsByUser(user, pageable)).thenReturn(expectedPage);
+
+        // Act
+        Page<Url> result = urlService.listUrlsByStatus(user, "expired", pageable);
+
+        // Assert
+        assertNotNull(result, "Result should not be null");
+        assertEquals(expectedPage, result, "The returned page should match the expected page");
+        verify(urlRepository, times(1)).findExpiredUrlsByUser(user, pageable);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should list all URLs by user")
+    void testListUrlsByStatus_All() {
+        // Arrange
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Pageable pageable = mock(Pageable.class);
+        List<Url> urls = List.of(new Url(), new Url());
+        Page<Url> expectedPage = new PageImpl<>(urls);
+
+        when(urlRepository.findByUser(user, pageable)).thenReturn(expectedPage);
+
+        // Act
+        Page<Url> result = urlService.listUrlsByStatus(user, "all", pageable);
+
+        // Assert
+        assertNotNull(result, "Result should not be null");
+        assertEquals(expectedPage, result, "The returned page should match the expected page");
+        verify(urlRepository, times(1)).findByUser(user, pageable);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException for invalid status")
+    void testListUrlsByStatus_InvalidStatus() {
+        // Arrange
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Pageable pageable = mock(Pageable.class);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            urlService.listUrlsByStatus(user, "invalid", pageable);
+        });
+
+        assertEquals("Invalid status: invalid", exception.getMessage(), "Exception message should match");
+    }
+
+    @Test
+    @DisplayName("Should update URL when valid inputs are provided")
+    void testUpdateUrl_Success() {
+        // Arrange
+        Long urlId = 1L;
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Url existingUrl = new Url();
+        existingUrl.setId(urlId);
+        existingUrl.setOriginalUrl("http://old.com");
+        existingUrl.setShortCode("abc123");
+
+        Url updatedData = new Url();
+        updatedData.setOriginalUrl("http://new.com");
+        updatedData.setShortCode("xyz789");
+
+        when(urlRepository.findByIdAndUser(urlId, user)).thenReturn(Optional.of(existingUrl));
+        when(urlRepository.save(any(Url.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        Url result = urlService.updateUrl(urlId, updatedData, user);
+
+        // Assert
+        assertNotNull(result, "Result should not be null");
+        assertEquals("http://new.com", result.getOriginalUrl(), "Original URL should be updated");
+        assertEquals("xyz789", result.getShortCode(), "Short code should be updated");
+        verify(urlRepository, times(1)).findByIdAndUser(urlId, user);
+        verify(urlRepository, times(1)).save(existingUrl);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should throw RuntimeException when URL not found or unauthorized")
+    void testUpdateUrl_NotFoundOrUnauthorized() {
+        // Arrange
+        Long urlId = 1L;
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Url updatedData = new Url();
+        updatedData.setOriginalUrl("http://new.com");
+        updatedData.setShortCode("xyz789");
+
+        when(urlRepository.findByIdAndUser(urlId, user)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            urlService.updateUrl(urlId, updatedData, user);
+        });
+
+        assertEquals("URL not found or user not authorized to edit it", exception.getMessage(), "Exception message should match");
+        verify(urlRepository, times(1)).findByIdAndUser(urlId, user);
+        verifyNoMoreInteractions(urlRepository);
+    }
+
+    @Test
+    @DisplayName("Should find URL by ID and User when present")
+    void testFindByIdAndUser_Success() {
+        // Arrange
+        Long urlId = 1L;
+        User user = User.builder().id(1L).email("test@example.com").build();
+
+        Url mockUrl = new Url();
+        mockUrl.setId(urlId);
+        mockUrl.setUser(user);
+
+        when(urlRepository.findByIdAndUser(eq(urlId), eq(user))).thenReturn(Optional.of(mockUrl));
+
+        // Act
+        Url result = urlService.findByIdAndUser(urlId, user);
+
+        // Assert
+        assertEquals(mockUrl, result, "The returned URL should match the mock URL");
+    }
+
+    @Test
+    @DisplayName("Should throw ShortUrlException when URL not found")
+    void testFindByIdAndUser_NotFound() {
+        // Arrange
+        Long urlId = 1L;
+        User nonExistantUser = User.builder().id(1L).email("testNonExistantUser@example.com").build();
+
+        when(urlRepository.findByIdAndUser(eq(urlId), eq(nonExistantUser))).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ShortUrlException.class, () -> urlService.findByIdAndUser(urlId, nonExistantUser), "Should throw ShortUrlException when URL is not found");
+    }
+
+    @Test
+    @DisplayName("Should throw ShortUrlException when shortCode already exists")
+    void testCreateUrl_ShortCodeAlreadyExists() {
+        // Arrange
+        User mockUser = User.builder().id(1L).email("test@example.com").build();
+
+        UrlCreateRequest request = new UrlCreateRequest("https://example.com", "customCode");
+
+        when(urlRepository.existsByShortCode(eq("customCode"))).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(ShortUrlException.class, () -> urlService.createUrl(request, mockUser),
+                "Should throw ShortUrlException when shortCode already exists");
     }
 }
