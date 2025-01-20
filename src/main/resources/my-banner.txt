@@ -1,2 +1,0 @@
-Active profile: ${spring.profiles.active}.
-${spring.application.name} is running on Spring Boot ${spring-boot.version}
