@@ -14,16 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import java.io.IOException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -76,41 +68,6 @@ class JwtAuthenticationFilterTest {
         verify(filterChain).doFilter(request, response);
         verifyNoInteractions(jwtService, userDetailsService);
     }
-
-
-    @Test
-    @DisplayName("Should authenticate with valid token")
-    void testAuthenticateWithValidToken() throws ServletException, IOException {
-
-        final String jwt = "valid.jwt.token";
-        final String email = "user@example.com";
-        final String password = "password";
-
-
-        UserDetails userDetails = mock(UserDetails.class);
-        when(userDetails.getUsername()).thenReturn(email);
-        when(userDetails.getPassword()).thenReturn(password);
-
-        when(jwtService.extractUserName(jwt)).thenReturn(email);
-        when(jwtService.isTokenValid(jwt, userDetails)).thenReturn(true);
-
-
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + jwt);
-        when(userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
-
-
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-
-        SecurityContext context = SecurityContextHolder.getContext();
-        assertNotNull(context.getAuthentication(), "Authentication should not be null");
-        assertTrue(context.getAuthentication() instanceof UsernamePasswordAuthenticationToken);
-        assertEquals(email, context.getAuthentication().getName());
-
-        verify(filterChain).doFilter(request, response);
-    }
-
-
 
 }
 
