@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.SHORT_CODE_ALREADY_EXISTS;
 import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
@@ -93,9 +92,14 @@ public class UrlService {
         log.info("URL with id={} was deleted by user with id={}", urlId, currentUser.getId());
     }
 
-    public Optional<Url> findByShortCode(String shortCode) {
+    public Url findByShortCode(String shortCode) {
         log.info("Fetching URL by shortCode={}", shortCode);
-        return urlRepository.findByShortCode(shortCode);
+
+        return urlRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> {
+                    log.warn("URL not found for shortCode={}", shortCode);
+                    return new ShortUrlException(ExceptionMessages.URL_NOT_FOUND);
+                });
     }
 
     @Transactional(readOnly = true)

@@ -1,7 +1,7 @@
-package org.goit.urlshortener;
+package org.goit.urlshortener.repository;
 
+import org.goit.urlshortener.TestcontainersConfiguration;
 import org.goit.urlshortener.model.User;
-import org.goit.urlshortener.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
