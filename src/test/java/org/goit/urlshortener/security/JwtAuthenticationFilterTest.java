@@ -18,14 +18,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.User;
 
+import java.io.IOException;
+import java.util.Collections;
+
+import static org.mockito.Mockito.*;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.util.Collections;
-
-@ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterTest {
 
     @Mock
