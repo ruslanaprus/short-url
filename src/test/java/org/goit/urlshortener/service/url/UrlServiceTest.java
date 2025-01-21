@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_EXPIRED;
-import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.URL_NOT_FOUND;
+import static org.goit.urlshortener.exceptionHandler.ExceptionMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -129,7 +128,7 @@ class UrlServiceTest {
 
         ShortUrlException exception = assertThrows(ShortUrlException.class,
                 () -> urlService.deleteUrl(1L, otherUser));
-        assertEquals(URL_NOT_FOUND.getMessage(), exception.getMessage());
+        assertEquals(URL_NOT_FOUND_OR_UNAUTHORIZED.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -207,7 +206,7 @@ class UrlServiceTest {
             urlService.findByShortCode(shortCode);
         });
 
-        assertEquals("URL not found", exception.getMessage(), "Exception message should match");
+        assertEquals("URL not found or user not authorized", exception.getMessage(), "Exception message should match");
         verify(urlRepository, times(1)).findByShortCode(shortCode);
         verifyNoMoreInteractions(urlRepository);
     }
@@ -311,6 +310,7 @@ class UrlServiceTest {
         updatedData.setShortCode("xyz789");
 
         when(urlRepository.findByIdAndUser(urlId, user)).thenReturn(Optional.of(existingUrl));
+        when(urlRepository.existsByShortCode("xyz789")).thenReturn(false);
         when(urlRepository.save(any(Url.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
@@ -320,7 +320,10 @@ class UrlServiceTest {
         assertNotNull(result, "Result should not be null");
         assertEquals("http://new.com", result.getOriginalUrl(), "Original URL should be updated");
         assertEquals("xyz789", result.getShortCode(), "Short code should be updated");
+        assertEquals(urlId, result.getId(), "Id should be updated");
+
         verify(urlRepository, times(1)).findByIdAndUser(urlId, user);
+        verify(urlRepository, times(1)).existsByShortCode("xyz789");
         verify(urlRepository, times(1)).save(existingUrl);
         verifyNoMoreInteractions(urlRepository);
     }
@@ -343,7 +346,7 @@ class UrlServiceTest {
             urlService.updateUrl(urlId, updatedData, user);
         });
 
-        assertEquals("URL not found or user not authorized to edit it", exception.getMessage(), "Exception message should match");
+        assertEquals("URL not found or user not authorized", exception.getMessage(), "Exception message should match");
         verify(urlRepository, times(1)).findByIdAndUser(urlId, user);
         verifyNoMoreInteractions(urlRepository);
     }
